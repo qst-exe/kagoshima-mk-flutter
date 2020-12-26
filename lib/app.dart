@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'config/router.dart';
 import 'ui/pages/home.dart';
 
 class App extends StatelessWidget {
@@ -12,7 +13,7 @@ class App extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: HomePage(),
-      // onGenerateRoute: PageRouter.generate,
+      onGenerateRoute: PageRouter.generate,
     );
   }
 }
