@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../../constants.dart';
+
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -11,8 +13,9 @@ class HomePage extends StatelessWidget {
         title: const Text('鹿児島.mk 投票アプリ'),
       ),
       body: StreamBuilder<QuerySnapshot>(
-          stream:
-              FirebaseFirestore.instance.collection('questions').snapshots(),
+          stream: FirebaseFirestore.instance
+              .collection(Constants.questionCollection)
+              .snapshots(),
           builder:
               (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (!snapshot.hasData || snapshot.data.docs.isEmpty) {
@@ -44,8 +47,9 @@ class HomePage extends StatelessWidget {
                               'questionId': _question['questionId'] as String,
                               'title': _question['title'] as String
                             };
-                            Navigator.of(context)
-                                .pushNamed('/detail', arguments: _args);
+                            Navigator.of(context).pushNamed(
+                                Constants.pageDetail,
+                                arguments: _args);
                           },
                           child: Padding(
                             padding: const EdgeInsets.only(left: 10),
@@ -54,7 +58,6 @@ class HomePage extends StatelessWidget {
                               child: Text(
                                 _question['title'] as String,
                                 overflow: TextOverflow.visible,
-                                style: const TextStyle(color: Colors.black54),
                               ),
                             ),
                           ),

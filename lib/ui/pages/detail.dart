@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../../constants.dart';
+
 class DetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -16,9 +18,9 @@ class DetailPage extends StatelessWidget {
       ),
       body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
-              .collection('questions')
+              .collection(Constants.questionCollection)
               .doc(_questionId)
-              .collection('choices')
+              .collection(Constants.choiceCollection)
               .snapshots(),
           builder:
               (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
