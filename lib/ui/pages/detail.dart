@@ -1,72 +1,107 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class DetailPage extends StatefulWidget {
-  @override
-  _DetailPageState createState() => _DetailPageState();
-}
-
-class _DetailPageState extends State<DetailPage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
+class DetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final args = ModalRoute.of(context).settings.arguments as Map;
+    final _title = args['title'] as String;
+    final _questionId = args['questionId'] as String;
+
+    final _screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
-        // the App.build method, and use it to set our appbar title.
-        title: const Text('鹿児島.mk 投票アプリ'),
+        title: Text(_title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('questions')
+              .doc(_questionId)
+              .collection('choices')
+              .snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (!snapshot.hasData || snapshot.data.docs.isEmpty) {
+              return const Center(
+                child: Text('現在選択肢はありません'),
+              );
+            }
+
+            final _choiceList = snapshot.data.docs.map((doc) {
+              final data = doc.data();
+              data['choiceId'] = doc.id;
+              return data;
+            }).toList();
+
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: Text(
+                          '【質問】$_title',
+                          style: const TextStyle(fontSize: 18),
+                        )),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        final _choice = _choiceList[index];
+                        final choiceId = _choice['choiceId'] as String;
+                        final votes = _choice['votes'] as int;
+
+                        return Padding(
+                            padding: const EdgeInsets.only(top: 20),
+                            child: Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.black38)),
+                                child: InkWell(
+                                  onTap: () {
+                                    final _updateData = {'votes': votes + 1};
+                                    FirebaseFirestore.instance
+                                        .collection('questions')
+                                        .doc(_questionId)
+                                        .collection('choices')
+                                        .doc(choiceId)
+                                        .update(_updateData);
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: SizedBox(
+                                      width: _screenWidth - 100,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            _choice['title'] as String,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                                color: Colors.black54),
+                                          ),
+                                          Text(
+                                            _choice['votes'].toString(),
+                                            style: const TextStyle(
+                                                color: Colors.black54),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                )));
+                      },
+                      itemCount: _choiceList.length,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
     );
   }
 }

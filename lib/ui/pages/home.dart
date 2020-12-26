@@ -1,73 +1,70 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
+class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final _screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: const Text('鹿児島.mk 投票アプリ'),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      body: StreamBuilder<QuerySnapshot>(
+          stream:
+              FirebaseFirestore.instance.collection('questions').snapshots(),
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (!snapshot.hasData || snapshot.data.docs.isEmpty) {
+              return const Center(
+                child: Text('現在質問はありません'),
+              );
+            }
+
+            final _questionList = snapshot.data.docs.map((doc) {
+              final data = doc.data();
+              data['questionId'] = doc.id;
+              return data;
+            }).toList();
+
+            return Padding(
+              padding: const EdgeInsets.all(10),
+              child: ListView.builder(
+                itemBuilder: (BuildContext context, int index) {
+                  final _question = _questionList[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black38)),
+                        child: InkWell(
+                          onTap: () {
+                            final _args = <String, String>{
+                              'questionId': _question['questionId'] as String,
+                              'title': _question['title'] as String
+                            };
+                            Navigator.of(context)
+                                .pushNamed('/detail', arguments: _args);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 10),
+                            child: SizedBox(
+                              width: _screenWidth - 100,
+                              child: Text(
+                                _question['title'] as String,
+                                overflow: TextOverflow.visible,
+                                style: const TextStyle(color: Colors.black54),
+                              ),
+                            ),
+                          ),
+                        )),
+                  );
+                },
+                itemCount: _questionList.length,
+              ),
+            );
+          }),
     );
   }
 }
