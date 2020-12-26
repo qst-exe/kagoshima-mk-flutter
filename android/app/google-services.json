@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "636670264830",
+    "project_id": "kagoshima-mk-13-flutter",
+    "storage_bucket": "kagoshima-mk-13-flutter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:636670264830:android:554ad19471bea46eb66caf",
+        "android_client_info": {
+          "package_name": "mk.kagoshima.poll"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "636670264830-oka2ottoul832rhgt2dtimd9dm5f62m7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHVzp2ueqRttZvisrA8EyC6TjI66uaBUY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "636670264830-oka2ottoul832rhgt2dtimd9dm5f62m7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "636670264830-k1lt09p94lkelcqd95v2v722h1bjpuq9.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "mk.kagoshima.poll"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
