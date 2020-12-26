@@ -24,6 +24,13 @@ class DetailPage extends StatelessWidget {
               .snapshots(),
           builder:
               (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: SizedBox(
+                    height: 50, width: 50, child: CircularProgressIndicator()),
+              );
+            }
+
             if (!snapshot.hasData || snapshot.data.docs.isEmpty) {
               return const Center(
                 child: Text('現在選択肢はありません'),
